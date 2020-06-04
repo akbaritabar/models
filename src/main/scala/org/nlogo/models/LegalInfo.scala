@@ -15,7 +15,12 @@ object LegalInfo {
     """<!-- (\d\d\d\d)( \d\d\d\d)?(( \w+)*)( Cite: .*)? -->""".r
   val validKeywords = List(
     "MIT", "Wilensky", "specialCE", "MAC", "Steiner",
-    "Stroup", "3D", "NIELS", "ConChem", "CC0", "BYSA", "GenEvo")
+    "Stroup", "3D", "NIELS", "ConChem", "CC0", "BYSA", "GenEvo", "MTG", "PNoM")
+  val hubnetCitation =
+    "* Wilensky, U. & Stroup, W. (1999). HubNet. " +
+    "http://ccl.northwestern.edu/netlogo/hubnet.html. " +
+    "Center for Connected Learning and Computer-Based " +
+    "Modeling, Northwestern University. Evanston, IL.\n"
   val textbookCitation =
     "* Wilensky, U. & Rand, W. (2015). Introduction " +
       "to Agent-Based Modeling: Modeling Natural, Social " +
@@ -51,10 +56,6 @@ case class LegalInfo(model: Model) {
     require(isCodeExample, "specialCE keyword is only for code examples")
 
   val path = model.file.getPath.drop(2)
-
-  val netlogohubnet =
-    if (model.isHubNet) "NetLogo HubNet"
-    else "NetLogo"
 
   val copyrightString = {
     if (keywords.contains("Steiner"))
@@ -97,7 +98,7 @@ case class LegalInfo(model: Model) {
       case _                             => cite + " and Wilensky, U."
     }
     builder.append(authors)
-    builder.append(" (" + year + ").  " + netlogohubnet + " " + model.name + " model.  ")
+    builder.append(" (" + year + ").  NetLogo " + model.name + " model.  ")
     builder.append("http://ccl.northwestern.edu/netlogo/models/" + model.compressedName + ".  ")
     builder.append("Center for Connected Learning and Computer-Based Modeling, ")
     if (model.isIABM) builder.append("Northwestern Institute on Complex Systems, ")
@@ -182,6 +183,11 @@ case class LegalInfo(model: Model) {
       builder.append("Center for Connected Learning and ")
       builder.append("Computer-Based Modeling, Northwestern University, Evanston, IL.\n")
 
+      if (model.isHubNet) {
+         builder.append("\n")
+         builder.append("Please cite the HubNet software as:\n\n")
+         builder.append(hubnetCitation)
+      }
       if (model.isIABM) {
         builder.append("\n")
         builder.append("Please cite the textbook as:\n\n")
@@ -209,6 +215,23 @@ case class LegalInfo(model: Model) {
         builder.append("GenEvo Systems Biology curriculum. ")
         builder.append("http://ccl.northwestern.edu/curriculum/genevo/. ")
         builder.append("Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.\n")
+      }
+      if (keywords.contains("MTG")) {
+        builder.append("\n")
+        builder.append("To cite the Mind the Gap curriculum as a whole, please use:\n\n")
+        builder.append("* Guo, Y. & Wilensky, U. (2018). ")
+        builder.append("Mind the Gap curriculum. ")
+        builder.append("http://ccl.northwestern.edu/MindtheGap/. ")
+        builder.append("Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.\n")
+      }
+      if (keywords.contains("PNoM")) {
+        builder.append("\n")
+        builder.append("To cite the Particulate Nature of Matter curriculum as a whole, please use:\n\n")
+        builder.append("* Novak, M., Brady, C., Holbert, N., Soylu, F. and Wilensky, U. (2010). ")
+        builder.append("Particulate Nature of Matter curriculum. ")
+        builder.append(" http://ccl.northwestern.edu/curriculum/pnom/. ")
+        builder.append("Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.\n")
+        builder.append("Thanks to Umit Aslan and Mitchell Estberg for updating these models for inclusion the in Models Library.\n")
       }
     }
     InfoTabParts.clean(builder.toString)

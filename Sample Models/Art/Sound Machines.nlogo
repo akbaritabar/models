@@ -764,7 +764,7 @@ If you mention this model or the NetLogo software in a publication, we ask that 
 
 For the model itself:
 
-* Wilensky, U. (2005).  NetLogo Sound Machines model.  http://ccl.northwestern.edu/netlogo/models/SoundMachines.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+* Steiner, J., Tisue, S. and Wilensky, U. (2005).  NetLogo Sound Machines model.  http://ccl.northwestern.edu/netlogo/models/SoundMachines.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 
 Please cite the NetLogo software as:
 
@@ -776,7 +776,7 @@ Copyright 2005 Uri Wilensky. Includes code by James P. Steiner.
 
 This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 2.5 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/2.5/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
 
-<!-- 2005 Steiner -->
+<!-- 2005 Steiner Cite: Steiner, J., Tisue, S. -->
 @#$#@#$#@
 default
 true
@@ -1237,7 +1237,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 set scale 2.5
 random-seed 2

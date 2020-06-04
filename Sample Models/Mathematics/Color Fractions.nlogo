@@ -219,8 +219,6 @@ Change the colors so you only use one color, but vary the lightness/darkness.
 
 Modify the program so you can visualize square roots and pi.
 
-Extend the program so you can have a full fraction Calculator such as [the one in the references](http://tapor1.mcmaster.ca/~sgs/cgi-bin/Maths/maths.cgi?theme=none&amp;lang=en&amp;do=activity&amp;activity=calc&amp;level=0).
-
 ## NETLOGO FEATURES
 
 Patch labels are used to show the digits.
@@ -233,7 +231,7 @@ Division
 
 ## CREDITS AND REFERENCES
 
-This model is adapted from: [Color Calculator Information for teachers](http://tapor1.mcmaster.ca/~sgs/cgi-bin/Maths/maths.cgi?theme=none&amp;lang=en&amp;do=asides&amp;activity=calc) and [Color Calculator](http://tapor1.mcmaster.ca/~sgs/cgi-bin/Maths/maths.cgi?theme=none&amp;lang=en&amp;do=activity&amp;activity=calc&amp;level=0).
+This model is adapted from a few resources that are no longer available: [Color Calculator Information for teachers and Color Calculator](http://tapor.ca/home).
 
 This model implements activities originally published in:
 Nathalie Sinclair, Rina Zazkis and Peter Liljedahl.  Number Worlds: Visual and Experimental Access to Elementary Number Theory Concepts.  International Journal of Computers for Mathematical Learning, Volume 8, Number 3, pages 235 - 263, January 2003.
@@ -544,7 +542,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 setup
 @#$#@#$#@

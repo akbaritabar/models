@@ -3,14 +3,13 @@ globals [
   bank-reserves
   bank-deposits
   bank-to-loan
-  x-max
-  y-max
+  xmax
+  ymax
   rich
   poor
   middle-class
-  rich-threshold
+  income-max
 ]
-
 
 turtles-own [
   savings
@@ -21,122 +20,117 @@ turtles-own [
   customer
 ]
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                     ;;;
+;;;  Setup Procedures   ;;;
+;;;                     ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 to setup
   clear-all
-  initialize-variables
-  ask patches [set pcolor black]
-  set-default-shape turtles "person"
+  initialize-settings
   create-turtles people [setup-turtles]
+  poll-class
   setup-bank
-  set x-max 300
-  set y-max 2 * money-total
+  set xmax 300
+  set ymax (2 * money-total)
   reset-ticks
 end
 
 
-to setup-turtles  ;; turtle procedure
-  set color blue
+to initialize-settings
+  set rich 0
+  set poor 0
+  set middle-class 0
+  set income-max 10
+end
+
+to setup-turtles  ;;Turtle Procedure
+  set shape "person"
   setxy random-xcor random-ycor
-  set wallet (random rich-threshold) + 1 ;;limit money to threshold
+  set wallet (random 2 * income-max)
   set savings 0
   set loans 0
   set wealth 0
   set customer -1
+  get-color
 end
 
-
-to setup-bank ;;initialize bank
+to setup-bank
   set bank-loans 0
   set bank-reserves 0
   set bank-deposits 0
   set bank-to-loan 0
 end
 
-
-to initialize-variables
-  set rich 0
-  set middle-class 0
-  set poor 0
-  set rich-threshold 10
-end
-
-
-to get-shape  ;;turtle procedure
-  if (savings > 10)  [set color green]
-  if (loans > 10) [set color red]
-  set wealth (savings - loans)
-end
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                     ;;;
+;;; Run Time Procedures ;;;
+;;;                     ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
-  ;;tabulates each distinct class population
-  set rich (count turtles with [savings > rich-threshold])
-  set poor (count turtles with [loans > 10])
-  set middle-class (count turtles - (rich + poor))
+  ask turtles [do-business]
   ask turtles [
-    ifelse ticks mod 3 = 0
-      [do-business] ;;first cycle, "do business"
-      [ifelse ticks mod 3 = 1  ;;second cycle, "balance books" and "get shape"
-         [balance-books
-          get-shape]
-         [bank-balance-sheet] ;;third cycle, "bank balance sheet"
-      ]
+    balance-books
+    get-color
   ]
+  bank-balance-sheet
+  poll-class
   tick
 end
 
-
-to do-business  ;;turtle procedure
-  rt random-float 360
-  fd 1
-
-  if ((savings > 0) or (wallet > 0) or (bank-to-loan > 0))
-    [set customer one-of other turtles-here
-     if customer != nobody
-     [if (random 2) = 0                      ;; 50% chance of trading with customer
-           [ifelse (random 2) = 0            ;; 50% chance of trading $5 or $2
-              [ask customer [set wallet wallet + 5] ;;give 5 to customer
-               set wallet (wallet - 5) ] ;;take 5 from wallet
-              [ask customer [set wallet wallet + 2] ;;give 2 to customer
-               set wallet (wallet - 2) ] ;;take 2 from wallet
-           ]
-        ]
-     ]
+;; polls the number in each corresponding economic class
+to poll-class
+  set rich (count turtles with [savings > income-max])
+  set poor (count turtles with [loans > income-max])
+  set middle-class (count turtles) - (rich + poor)
 end
 
+to do-business  ;;Turtle Procedure
+  rt random 360
+  fd 1
+  ;; turtle has money to trade with, and there is
+  ;; another turtle to trade with on the same patch
+  if ((savings > 0) or (wallet > 0) or (bank-to-loan > 0)) [
+    set customer one-of other turtles-here
+    if customer != nobody and (random 2) = 0          ;;50% chance of trading
+      [ifelse (random 2 = 0)                          ;;50% chance of trading $2 or $5, if trading
+         [ask customer [set wallet wallet + 5]
+          set wallet (wallet - 5)]
+         [ask customer [set wallet wallet + 2]
+          set wallet (wallet - 2)]
+      ]
+  ]
+end
 
-
-;; First checks balance of the turtle's wallet, and then either puts
-;; a positive balance in savings, or tries to get a loan to cover
-;; a negative balance.  If it cannot get a loan (if bank-to-loan < 0)
-;; then it maintains the negative balance until the next round.  It
-;; then checks if it has loans and money in savings, and if so, will
-;; proceed to pay as much of that loan off as possible from the money
-;; in savings.
-
-to balance-books
+;; Check the balance of our wallet.
+;; Put a positive balance in savings.  Try to get a loan to cover a
+;; negative balance.  If we cannot get a loan (if bank-to-loan < 0)
+;; then maintain the negative wallet balance until the next round.
+to balance-books  ;;Turtle Procedure
   ifelse (wallet < 0)
-    [ifelse (savings >= (- wallet))
-       [withdraw-from-savings (- wallet)]
-       [if (savings > 0)
-          [withdraw-from-savings savings]
+   [ifelse (savings >= (- wallet))
+      [withdraw-from-savings (- wallet)]
+      [if (savings > 0)
+         [withdraw-from-savings savings]
+       set temp-loan bank-to-loan
+       ifelse (temp-loan >= (- wallet))
+         [take-out-a-loan (- wallet)]
+         [take-out-a-loan temp-loan]
+      ]
+   ]
+   [deposit-to-savings wallet]
 
-        set temp-loan bank-to-loan           ;;temp-loan = amount available to borrow
-        ifelse (temp-loan >= (- wallet))
-          [take-out-loan (- wallet)]
-          [take-out-loan temp-loan]
-       ]
-     ]
-    [deposit-to-savings wallet]
-
-  if (loans > 0 and savings > 0)            ;; when there is money in savings to payoff loan
-    [ifelse (savings >= loans)
-       [withdraw-from-savings loans
-        repay-a-loan loans]
-       [withdraw-from-savings savings
-        repay-a-loan wallet]
-    ]
+;; repay loans if savings are available
+  if (loans > 0) and (savings > 0) [
+    ifelse (savings >= loans)
+      [withdraw-from-savings loans
+       repay-a-loan loans]
+      [withdraw-from-savings savings
+       repay-a-loan wallet]
+  ]
 end
 
 
@@ -145,38 +139,45 @@ end
 ;; result in a negative bank-to-loan amount, which
 ;; means that the bank will be unable to loan money
 ;; until it can set enough aside to account for reserves.
-
-to bank-balance-sheet ;;update monitors
+to bank-balance-sheet
   set bank-deposits sum [savings] of turtles
   set bank-loans sum [loans] of turtles
-  set bank-reserves (reserves / 100) * bank-deposits
-  set bank-to-loan bank-deposits - (bank-reserves + bank-loans)
+  set bank-reserves ((reserves / 100) * bank-deposits)
+  set bank-to-loan (bank-deposits - (bank-reserves + bank-loans))
 end
 
 
-to deposit-to-savings [amount] ;;fundamental procedures
-  set wallet wallet - amount
-  set savings savings + amount
+to deposit-to-savings [amount]  ;; Turtle Procedure
+  set wallet (wallet - amount)
+  set savings (savings + amount)
 end
 
-
-to withdraw-from-savings [amount] ;;fundamental procedures
+to withdraw-from-savings [amount]  ;; Turtle Procedure
   set wallet (wallet + amount)
   set savings (savings - amount)
 end
 
 
-to repay-a-loan [amount] ;;fundamental procedures
+to repay-a-loan [amount]  ;; Turtle Procedure
   set loans (loans - amount)
   set wallet (wallet - amount)
   set bank-to-loan (bank-to-loan + amount)
 end
 
-
-to take-out-loan [amount] ;;fundamental procedures
+to take-out-a-loan [amount]  ;; Turtle Procedure
   set loans (loans + amount)
   set wallet (wallet + amount)
   set bank-to-loan (bank-to-loan - amount)
+end
+
+
+;; color codes the rich (green),
+;; middle-class (gray), and poor (red)
+to get-color ;;Turtle Procedure
+  set color gray
+  if (savings > income-max) [set color green]
+  if (loans > income-max)  [set color red]
+  set wealth (savings - loans)
 end
 
 
@@ -184,16 +185,13 @@ to-report savings-total
   report sum [savings] of turtles
 end
 
-
 to-report loans-total
   report sum [loans] of turtles
 end
 
-
 to-report wallets-total
   report sum [wallet] of turtles
 end
-
 
 to-report money-total
   report sum [wallet + savings] of turtles
@@ -204,13 +202,13 @@ end
 ; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-262
+272
 10
-576
-325
+603
+342
 -1
 -1
-18.0
+19.0
 1
 10
 1
@@ -232,39 +230,24 @@ ticks
 
 SLIDER
 138
-84
-260
-117
-people
-people
-0.0
-200.0
-57.0
-1.0
+79
+269
+112
+reserves
+reserves
+0
+100
+21.0
 1
-NIL
-HORIZONTAL
-
-SLIDER
-2
-84
-137
-117
-reserves
-reserves
-0.0
-100.0
-52.0
-1.0
 1
 NIL
 HORIZONTAL
 
 BUTTON
-47
+60
 41
-136
-78
+131
+74
 setup
 setup
 NIL
@@ -277,11 +260,147 @@ NIL
 NIL
 1
 
+SLIDER
+4
+79
+131
+112
+people
+people
+0
+500
+473.0
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+6
+372
+286
+571
+Money & Loans
+Time
+Mny + Lns
+0.0
+300.0
+-50.0
+1100.0
+true
+true
+"set-plot-x-range 0 xmax\nset-plot-y-range -50 ymax" ""
+PENS
+"money" 1.0 0 -16777216 true "" "plot money-total"
+"loans" 1.0 0 -2674135 true "" "plot loans-total"
+
+PLOT
+307
+372
+588
+571
+Savings & Wallets
+Time
+Svngs + Wllts
+0.0
+300.0
+-50.0
+1100.0
+true
+true
+"set-plot-x-range 0 xmax\nset-plot-y-range -50 ymax" ""
+PENS
+"savings" 1.0 0 -10899396 true "" "plot savings-total"
+"wallets" 1.0 0 -13345367 true "" "plot wallets-total"
+
+PLOT
+609
+372
+894
+571
+Income Dist
+Time
+People
+0.0
+300.0
+0.0
+100.0
+true
+true
+"set-plot-x-range 0 xmax\nset-plot-y-range 0 people" ""
+PENS
+"rich" 1.0 0 -10899396 true "" "plot rich"
+"middle" 1.0 0 -16777216 true "" "plot middle-class"
+"poor" 1.0 0 -2674135 true "" "plot poor"
+
+PLOT
+610
+164
+894
+363
+Wealth Dist Hist
+Wealth
+People
+-50.0
+50.0
+0.0
+100.0
+false
+false
+"set-plot-y-range 0 people" ""
+PENS
+"hist" 1.0 1 -13345367 true "" "set-histogram-num-bars 10\nhistogram [wealth] of turtles"
+"ave-wealth" 1.0 0 -7500403 true "" "let wealth-list [wealth] of turtles\nlet min-wealth round (min wealth-list)\nlet max-wealth round (max wealth-list)\nifelse min-wealth < max-wealth\n  [ set-plot-x-range min-wealth max-wealth ]\n  [ set-plot-x-range min-wealth (min-wealth + 1) ]\n\n;; draw gray line in center of distribution\nplot-pen-reset\nlet ave-wealth mean wealth-list\nplotxy ave-wealth 0\nplotxy ave-wealth people"
+
+MONITOR
+38
+118
+131
+163
+Savings total
+savings-total
+2
+1
+11
+
+MONITOR
+138
+117
+240
+162
+Wallets total
+wallets-total
+2
+1
+11
+
+MONITOR
+38
+179
+131
+224
+Loans total
+loans-total
+2
+1
+11
+
+MONITOR
+138
+178
+235
+223
+Money total
+money-total
+2
+1
+11
+
 BUTTON
-149
+138
 41
-236
-78
+209
+74
 go
 go
 T
@@ -294,192 +413,77 @@ NIL
 NIL
 0
 
-PLOT
-4
-350
-247
-548
-Money & Loans
-Time
-Mny + Lns
-0.0
-300.0
--50.0
-600.0
-true
-true
-"set-plot-x-range 0 x-max\nset-plot-y-range -50 y-max" ""
-PENS
-"money" 1.0 0 -16777216 true "" "plot money-total"
-"loans" 1.0 0 -2674135 true "" "plot loans-total"
-
 MONITOR
-144
-173
-259
-218
-Wallets Total
-wallets-total
+37
+266
+88
+311
+rich
+rich
 2
 1
 11
 
 MONITOR
-144
-124
-259
-169
-Savings Total
-savings-total
+99
+266
+199
+311
+middle class
+middle-class
 2
 1
 11
 
 MONITOR
-144
-222
-259
-267
-Loans Total
-loans-total
+210
+266
+260
+311
+poor
+poor
 2
 1
 11
 
-MONITOR
-19
-124
-144
-169
-Money Total
-money-total
-2
-1
+TEXTBOX
+39
+239
+209
+257
+Income Distribution:
 11
-
-MONITOR
-19
-222
-144
-267
-Bank Reserves
-bank-reserves
-2
-1
-11
-
-MONITOR
-19
-173
-144
-218
-Bank to Loan
-bank-to-loan
-2
-1
-11
-
-PLOT
-250
-350
-510
-548
-Savings & Wallets
-Time
-Svngs + Wllts
 0.0
-300.0
--50.0
-600.0
-true
-true
-"set-plot-x-range 0 x-max\nset-plot-y-range -50 y-max" ""
-PENS
-"savings" 1.0 0 -13345367 true "" "plot savings-total"
-"wallets" 1.0 0 -10899396 true "" "plot wallets-total"
-
-PLOT
-581
-144
-844
-342
-Income Dist
-Time
-People
-0.0
-300.0
-0.0
-57.0
-true
-true
-"set-plot-x-range 0 x-max\nset-plot-y-range 0 (count turtles)" ""
-PENS
-"rich" 1.0 0 -10899396 true "" "plot rich"
-"middle" 1.0 0 -16777216 true "" "plot middle-class"
-"poor" 1.0 0 -2674135 true "" "plot poor"
-
-PLOT
-514
-350
-827
-548
-Wealth Distribution Histogram
-poor <--------> rich
-People
-0.0
-100.0
-0.0
-57.0
-false
-false
-"set-plot-y-range 0 (count turtles)" ""
-PENS
-"hist" 1.0 0 -13345367 true "" "if( ticks mod 10 = 1 ) [\n  let max-wealth max [wealth] of turtles\n  let min-wealth min [wealth] of turtles\n  let one-fifth-wealth 0.2 * (max-wealth - min-wealth)\n  let num-bins 10\n  let index 1\n  let interval round ((plot-x-max - plot-x-min) / num-bins)\n  plot-pen-reset\n  repeat num-bins [\n    plotxy ((index - 1) * interval + 0.002)\n                 (count turtles with [\n                      wealth < (min-wealth + index * one-fifth-wealth) and\n                      wealth >= (min-wealth + (index - 1) * one-fifth-wealth)\n                  ]\n                 )\n\n    plotxy  (index * interval)\n                 (count turtles with [\n                      wealth < (min-wealth + index * one-fifth-wealth) and\n                      wealth >= (min-wealth + (index - 1) * one-fifth-wealth)\n                  ]\n                 )\n\n    plotxy (index * interval + 0.001) 0\n    set index index + 1\n  ]\n]"
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
 
-This program models the creation of money in an economy through a private banking system. As most of the money in the economy is kept in banks but only little of it needs to be used (i.e. in cash form) at any one time, the banks need only keep a small portion of their savings on-hand for those transactions. This portion of the total savings is known as the banks' reserves.
+This model is a simple extension of the model "Bank Reserves". The purpose of the model is to help the user examine whether there is a relationship between the reserve ratio that banks must keep and the degree of equality in the distribution of the money that exist in the system.
 
-The banks are then able to loan out the rest of their savings. The government (the user in this case) sets a reserve ratio mandating how much of the banks' holdings must be kept in reserve at a given time. One 'super-bank' is used in this model to represent all banks in an economy. As this model demonstrates, the reserve ratio is the key determiner of how much money is created in the system.
+It models the creation of money in an economy through a private banking system. As most of the money in the economy is kept in banks but only a little of it needs to be used (i.e. in cash form) at any one time, the banks need only keep a small portion of their savings on-hand for those transactions. This portion of the total savings is known as the banks' reserves. The banks are then able to loan out the rest of their savings. The government (the user in this case) sets a reserve ratio mandating how much of the banks' holdings must be kept in reserve at a given time. One 'super-bank' is used in this model to represent all banks in an economy. As this model demonstrates, the reserve ratio is the key determiner of how much money is created in the system.
 
 ## HOW IT WORKS
 
-In each round, people (represented by turtles) interact with each other to simulate everyday economic activity. Given a randomly selected number, when a person is on the same patch as someone else it will either give the person two or five dollars, or no money at all. After this, people must then sort out the balance of their wallet with the bank. People will put a positive wallet balance in savings, or pay off a negative balance from funds already in savings. If the savings account is empty and the wallet has a negative balance, a person will take out a loan from the bank if funds are available to borrow (if bank-to-loan > 0). Otherwise the person maintains the negative balance until the next round. Lastly, if someone has money in savings and money borrowed from the bank, that person will pay off as much of the loan as possible using the savings.
+In each round, people (represented by turtles) interact with each other to simulate everyday economic activity. Given a randomly selected number, when a person is on the same patch as someone else it will either give the person two or five dollars, or no money at all. After this, people must then sort out the balance of their wallet with the bank. People will put a positive wallet balance in savings, or pay off a negative balance from funds already in savings. If the savings account is empty and the wallet has a negative balance, a person will take out a loan from the bank if funds are available to borrow (if bank-to-loan > 0). Otherwise, the person maintains the negative balance until the next round. Lastly, if someone has money in savings and money borrowed from the bank, that person will pay off as much of the loan as possible using the savings.
+
+The number of rich people in each moment is calculated by enumerating the number of people whose savings exceed 10 dollars. The number of poor people is the number of people whose loans exceed 10 dollars. The rest of the people are considered to belong to the "middle-class".
 
 ## HOW TO USE IT
 
 The RESERVES slider sets the banking reserve ratio (the percentage of money that a bank must keep in reserve at a given time). The PEOPLE slider sets the number of people that will be created in the model when the SETUP button is pressed. The SETUP button resets the model: it redistributes the patch colors, creates PEOPLE people and initializes all stored values. The GO button starts and stops the running of the model and the plotter.
 
-There are numerous display windows in the interface to help the user see where money in the economy is concentrated at a given time. SAVINGS-TOTAL indicates the total amount of money currently being kept in savings (and thus, in the banking system). The bank must then allocate this money among three accounts: LOANS-TOTAL is the amount the bank has lent out, BANK-TO-LOAN is the amount that the bank has available for loan, and BANK-RESERVES is the amount the bank has been mandated to keep in reserve. When the bank must recall loans (i.e. after the reserve ratio has been raised) BANK-TO-LOAN will read a negative amount until enough of the lent money has been paid off. WALLETS-TOTAL gives an indication of the total amount of money kept in peoples' wallets. This figure may also be negative at times when the bank has no money to loan (the turtle will maintain at a negative wallet balance until a loan is possible). MONEY-TOTAL indicates the total-amount of money currently in the economy (SAVINGS-TOTAL + WALLETS-TOTAL).  Because WALLETS-TOTAL is generally kept at 0 in this model (we are assuming that everyone deposits all they can in savings), MONEY-TOTAL and SAVINGS TOTAL tend to be the the same.
-
-A person's color tells us whether it has money in savings (green) or is in debt (red).
-
 ## THINGS TO NOTICE
 
-Note how much money is in MONEY-TOTAL after pressing SETUP, but before pressing GO. The total amount of money that can be created will be this figure:
+There are numerous display windows in the interface to help the user see where money in the economy is concentrated at a given time. SAVINGS-TOTAL indicates the total amount of money currently being kept in savings (and thus, in the banking system). LOANS-TOTAL is the amount the bank has lent out. WALLETS-TOTAL gives an indication of the total amount of money kept in the peoples' wallets. This figure may be negative at times when the bank has no more money to loan (the turtle will maintain a negative wallet balance until a loan is possible). MONEY-TOTAL indicates the total-amount of money currently in the economy (SAVINGS-TOTAL + WALLETS-TOTAL). Because WALLETS-TOTAL is generally kept at 0 in this model (we are assuming that everyone deposits all they can in savings), MONEY-TOTAL and SAVINGS TOTAL tend to be the same.
 
-(the initial money in the system) * (1 / RESERVES).
+The three lower monitors show the number of rich, middle-class, or poor people. A person's color tells us whether he is rich (green color), middle-class (gray), or poor (red).
 
-If the RESERVES remains constant through the run of the model, notice how the plot levels off at this value. Why is this equation descriptive of the system?
-
-Once the amount of money in the system has hit the maximum (as calculated be the above equation), watch what happens when the RESERVES slider is set to 100. Now try setting the RESERVES slider back. Why does this happen?
-
-The three monitors on the left of the interface (LOANS-TOTAL, BANK-TO-LOAN and RESERVES) represent the distribution of the bank's money at a given time. Try and track this distribution against SAVINGS-TOTAL, WALLETS-TOTAL and MONEY-TOTAL to understand fluctuations of money in the  system as they happen.
-
-What effect does an increase in RESERVES generally have on TOTAL-MONEY?
-
-Why do SAVINGS-TOTAL (yellow), LOANS-TOTAL (red) and MONEY-TOTAL (green) tend to rise and fall proportionately on the plot?
-
-What happens to TOTAL-MONEY when the reserve ratio is initially set to 100 percent? Why?
+There are four plots to help you observe the operation of the economy. Plot 1 plots the number of LOANS-TOTAL and MONEY-TOTAL as a function of time.  Plot 2 plots the number of SAVINGS-TOTAL and WALLETS-TOTAL. Plot 3 plots income distribution and is the feature that you should pay the most attention to. The green pen plots the number of rich people; the black pen plots the number of middle-class people; the red pen plots the number of poor people. Finally, the fourth plot is a histogram that depicts how wealth is distributed among the population. Wealth is distributed in ten bars. Each bar corresponds to one tenth of the range of wealth.  The gray line in the histogram represents the mean wealth value of all the turtles.
 
 ## THINGS TO TRY
 
-Vary the RESERVES rate as the model runs, and watch the effect this has on MONEY-TOTAL.
-
-Set RESERVES initially to 100, and watch the effect on TOTAL-MONEY. Now try lowering RESERVES.
-
-Try setting the reserve rate to 0. What would happen if this were done in a real economy?
+Vary the RESERVES rate as the model runs, and watch the effect this has on income distribution. You can either watch the three Income Distribution monitors, or the Income Distribution plot.  Set RESERVES initially to 100 and observe the Income Distribution plot. Gradually lower RESERVES and see the effect on wealth distribution. Can you see whether the two of them are positively, negatively, or not related?
 
 ## EXTENDING THE MODEL
 
@@ -489,7 +493,7 @@ This model has turtles interact in a very simple way to have money change hands 
 
 ## RELATED MODELS
 
-Wealth Distribution looks at how the reserve ratio affects the distribution of wealth.
+Bank Reserves
 
 ## HOW TO CITE
 
@@ -497,7 +501,7 @@ If you mention this model or the NetLogo software in a publication, we ask that 
 
 For the model itself:
 
-* Wilensky, U. (1998).  NetLogo Bank Reserves model.  http://ccl.northwestern.edu/netlogo/models/BankReserves.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+* Wilensky, U. (1998).  NetLogo Cash Flow model.  http://ccl.northwestern.edu/netlogo/models/CashFlow.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 
 Please cite the NetLogo software as:
 
@@ -801,7 +805,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

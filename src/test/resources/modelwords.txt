@@ -22,6 +22,7 @@ abelson
 Aboveground
 Abrahamson
 abs
+ABPSs
 absorber
 abutter
 abutters
@@ -154,6 +155,7 @@ aquafy
 ar
 ArcGIS
 arcgis
+archaea
 arcl
 arcr
 Ardennes
@@ -215,6 +217,7 @@ AvailableCoalitions
 aval
 avatar
 ave
+aves
 AVG
 Avg
 avg
@@ -242,6 +245,8 @@ backpropagate
 backpropagation
 backticks
 bacterias
+Bacteriophage
+bacteriophages
 badcollisions
 baed
 Baer
@@ -263,6 +268,7 @@ Barabási's
 Barbosa
 barnacles
 Barnsley
+Barrangou
 bartok
 Batesian
 Bateson
@@ -291,6 +297,7 @@ beethoven
 BehaviorSpace
 behaviorspace
 behaviour
+Belknap
 Bellaria
 BellCurve
 Beloit
@@ -322,6 +329,7 @@ biconnected
 bigfish
 bigpay
 bigpollute
+Bikard
 bilayer
 bilinear
 bimolecular
@@ -364,6 +372,7 @@ boids
 Bonabeau
 Bonachela
 bonemarrow
+Bondy
 bonk
 bool
 boolean
@@ -590,7 +599,9 @@ CoalitionsOneDim
 codependency
 codon
 codons
+coeff
 coevolution
+coevolutionary
 coevolve
 coevolving
 col
@@ -660,6 +671,7 @@ conj
 ConnectedChemistry
 connectedness
 connecteds
+Connor
 conR
 conrate
 CONST
@@ -687,6 +699,7 @@ coords
 copture
 cor
 cornell
+cortisol
 cos
 cosmopolitans
 Couder
@@ -708,6 +721,7 @@ creat
 createfield
 creativecommons
 cribellata
+CRISPR
 criticality
 crits
 crnd
@@ -800,6 +814,7 @@ Dawkins
 Daylength
 dB
 db
+dbscan
 DC
 dc
 dcs
@@ -829,6 +844,7 @@ decr
 decrement
 def
 defect's
+defences
 defother
 deg
 degmaxmynode
@@ -843,6 +859,7 @@ demoing
 demystifying
 denine
 Dennett's
+Denomy
 densityIncrease
 Densmore's
 deoxyribose
@@ -895,6 +912,7 @@ Dilemmma
 dimensioned
 dimensionlength
 dimerization
+dimers
 DiningPhilosophers
 DiProtic
 Diprotic
@@ -936,11 +954,13 @@ Dixson
 DJ
 djembe
 dkor
+dL
 DLA
 DLAAlternate
 DLAAlternateLinear
 dn
 dna
+Dnwrd
 doc
 docs
 docsouth
@@ -1082,6 +1102,7 @@ entomologists
 enum
 enumeratedValueSet
 env
+environ
 EnzymeKinetics
 epicycloid
 epiDEM
@@ -1091,6 +1112,7 @@ Epstein's
 eq
 eqn
 eqspi
+Espino
 EquidistantProbability
 equilibrated
 equiprobable
@@ -1102,6 +1124,7 @@ erikclean
 Errorand
 ESRI
 esri
+Estberg
 Estlund
 et
 ethan
@@ -1120,6 +1143,7 @@ EUROLOGO
 european
 Europhys
 EV
+eval
 Evanston
 everreau
 everyone's
@@ -1240,6 +1264,7 @@ Forrest
 Forrest's
 fot
 fourteenths
+fov
 fput
 frA
 frac
@@ -1312,6 +1337,8 @@ GasLabSecondLaw
 GasLabSingleCollision
 GasLabTwoGas
 GasLabWithSound
+gaster
+gasters
 gatech
 GAU
 Gaubatz
@@ -1319,6 +1346,7 @@ Gazzola
 Gb
 GCA
 GCC
+gcd
 GCG
 gcolor
 GCU
@@ -1373,10 +1401,16 @@ Girvan
 gis
 GitHub
 github
+gkx
 gLegalAlcoholLimit
 gln
 globals
+GLP
 glu
+glucagon
+GLUCAGON
+glucagons
+glucoses
 gly
 glycine
 gMaxTurnAngle
@@ -1403,18 +1437,21 @@ Gorodetsky
 gotta
 gov
 GPCEE
+grapher
 graphml
 GraphML
 Grassberger
 Graul
 grayish
 graylevel
+gravities
 GreenBelt
 greenpref
 Gregor
 grey
 Greyscale
 gridcount
+Grider
 Gridlock
 gridlock
 gridx
@@ -1450,6 +1487,7 @@ gw
 gx
 gy
 gyhr
+gynes
 HAconc
 Hadassah
 Halevy
@@ -1530,6 +1568,7 @@ hola
 Holbert
 holey
 holeyness
+Hölldobler
 Holt
 homeostasis
 homonymous
@@ -1581,6 +1620,7 @@ HubNetPublicGood
 HubNetRestaurants
 HubNetSampler
 HubNetTragedyOfTheCommons
+Hugenholz
 Hulette
 humoral
 hunter's
@@ -1637,6 +1677,7 @@ image's
 immunodeficiency
 implode
 imprecisions
+improvisatory
 imult
 inbound
 inbox
@@ -1656,6 +1697,7 @@ ineluctability
 inf
 infectable
 infective
+infectivity
 inhib
 inide
 INIT
@@ -1671,11 +1713,13 @@ inspi
 inst
 instantiation
 instr
+insulins
 int
 integrator
 integrable
 Intelligencer
 interactors
+interconverted
 interferences
 intermittency
 intermolecular
@@ -1688,6 +1732,7 @@ intraspeaker
 intx
 inty
 inuteis
+intergenerational
 Inv
 inv
 inwhich
@@ -1703,6 +1748,7 @@ iPod
 iPods
 IPTG
 IR
+Iranzo
 irradiance
 IRs
 isecs
@@ -1722,6 +1768,7 @@ itemAC
 Itemx
 itemx
 iter
+iteratively
 iters
 ITR
 jalisco
@@ -1737,6 +1784,7 @@ Jepsen
 Jerde
 JFBFA
 jhotdraw
+Jiang
 jim
 Jin
 JinGirNew
@@ -1778,6 +1826,7 @@ kate
 Katsuya
 Kb
 Kc
+kcal
 Kd
 kellogg
 Kelter
@@ -1807,6 +1856,7 @@ kochSnowflake
 Kofi
 kofi
 Konopka
+Koonin
 Kornhauser
 Koros
 Kosten
@@ -1818,8 +1868,10 @@ krypto
 kth
 Ku
 Kunihiko
+Kunin
 kx
 ky
+Labrie
 lacI
 LACI
 lacIs
@@ -1904,6 +1956,7 @@ lMapList
 ln
 Lns
 lo
+Lobkovsky
 loc
 localpref
 localwin
@@ -1951,6 +2004,10 @@ lymphatic
 Lyons
 Lys
 lys
+lysogenic
+Lysogenization
+Lysogens
+lytic
 László
 mac
 Mac's
@@ -1959,10 +2016,13 @@ mach
 Macrobehavior
 Macrobehavioral
 macromolecules
+macrophage
+macrophages
 Macs
 MacStarLogo
 Maeke
 mag
+Magadán
 MAGENTAS
 magentas
 magnetude
@@ -1994,6 +2054,7 @@ markdown
 market's
 markup
 Maroulis
+Marraffini
 marshallers
 mas
 MaterialSim
@@ -2021,6 +2082,7 @@ Maxwells
 maxwells
 mb
 mberland
+mBio
 MC
 mc
 McCarroll
@@ -2070,6 +2132,8 @@ Michaeles
 Michaelis
 michelle
 microbiological
+microbiome
+microenvironments
 Micromotives
 microworld
 Microworlds
@@ -2114,9 +2178,11 @@ mmolOH
 mnrch
 mnrchs
 Mny
+Mobilia
 modcharge
 modelled
 Modelling
+Modell
 ModelSim
 modiforce
 modularity
@@ -2125,6 +2191,7 @@ MOLARITY
 Molofsky
 momentums
 Mondrian
+Moineau
 monitorwater
 monomolecularly
 monopolist
@@ -2201,6 +2268,7 @@ NaCl
 nadd
 Nagorcka
 nand
+nanoliters
 nanoparticles
 Nara
 nAre
@@ -2209,6 +2277,7 @@ narrowcast
 nask
 Nassauer
 Nathalie
+natively
 nauto
 Navier
 nb
@@ -2254,6 +2323,7 @@ NetLogo
 netlogo
 NetLogo's
 neumann
+neutrophils
 Neuwirth
 NewAids
 newAIDS
@@ -2415,6 +2485,7 @@ num
 NumAlgae
 NumberOfAgents
 NumberOfAvailableCoalitions
+numpy
 NUMS
 nums
 NUMTURTLES
@@ -2521,6 +2592,7 @@ overtraining
 oxalic
 OXCOR
 oxcor
+oy
 OYCOR
 oycor
 oz
@@ -2534,6 +2606,7 @@ pacmans
 pacmap
 PageRank
 PageRanks
+Paez
 PaintedDesertChallenge
 paireds
 palevitz
@@ -2569,6 +2642,7 @@ pathces
 pathfinder
 pathfinders
 Pattis
+PartSim
 paulc
 Paulo
 paulo
@@ -2681,6 +2755,7 @@ plantcrop
 plantcropseed
 PlantGrowth
 plantwildseed
+plasmid
 playerst
 PLC
 plist
@@ -2689,11 +2764,14 @@ plotfrq
 plotwindow
 plotxy
 pm
+pmf
+pmol
 pmt
 pmy
 pnas
 PNG
 png
+PNoM
 PO
 po
 pOH
@@ -2802,10 +2880,14 @@ ProbLab's
 ProbLabGenetics
 problematizes
 proc
+processivity
 PROFILER
 Profiler
 profiler
 programmatically
+Prokaryotes
+Prokaryotic
+Prophage
 PROTESTORS
 protonated
 ProvisionCosts
@@ -2840,6 +2922,7 @@ pycor
 pycors
 pythagorean
 pzcor
+Qimron
 qs
 qtj
 Qty
@@ -2895,6 +2978,7 @@ rcore
 Reabsorption
 ReactorTopDown
 ReactorX
+reacquisition
 reate
 reattach
 REC
@@ -2932,6 +3016,7 @@ REGROWTH
 Regrowth
 regrowth
 reimplemented
+Reichenbach
 reinfected
 Reingold
 Reisman
@@ -2958,6 +3043,7 @@ repuzzlefy
 reradiated
 resample
 resampled
+rescaling
 ReservoirFigure
 resistive
 resize
@@ -3003,6 +3089,7 @@ riverbed
 rmult
 rn
 rnd
+RNAs
 RNAP
 rnapol
 RNAPs
@@ -3070,6 +3157,7 @@ ry
 Rényi
 sa
 sabar
+Sabri
 SAfriAndCowsMonogamous
 SAfriAndCowsNoMarriage
 SAfriAndCowsPolyandry
@@ -3102,6 +3190,7 @@ Sheffer
 Scheinkman
 Schelling's
 Scherer
+scherichia
 Sci
 sci
 sciencenews
@@ -3234,6 +3323,7 @@ showlabel
 shp
 shtml
 ShuffleBoard
+sideant
 sideview
 Sierpinski
 sierpinski
@@ -3266,6 +3356,7 @@ Sitar
 sk
 skelter
 skillset
+sklearn
 Skyrms
 Skyrms's
 SLFF
@@ -3293,13 +3384,16 @@ soloer
 soloistic
 SolidDiffusion
 Solla
+somatostatin
 somelist
 sonification
 sonified
 sonify
 sonifying
+Sorek
 SoundMachines
 sourceforge
+Soylu
 Sp
 sp
 spacetime
@@ -3394,6 +3488,7 @@ STRENGTHs
 stretchy
 Strogatz
 StrongAcid
+Strotskaya
 Stroup
 struct
 studentThe
@@ -3443,6 +3538,7 @@ synch
 synched
 synchrony
 syr
+sys
 Syst
 SystemFractals
 Szalay
@@ -3518,6 +3614,7 @@ Theoritically
 Theraulaz
 THERMO
 thermodynamical
+thermophilus
 THHH
 THHT
 thier
@@ -3544,6 +3641,7 @@ tillfarm
 TimeElapsed
 TimeInterval
 timeLimit
+timeline
 timestep
 Timmmis
 TinBox
@@ -3706,6 +3804,7 @@ UNKOWN
 unlabel
 UNMARK
 unmark
+Umit
 unobstructed
 unordered
 unpaint
@@ -3728,12 +3827,14 @@ Unterman
 untriggered
 unwooded
 updaters
+Upwrd
 upwash
 UrbanDistance
 Uri
 uri's
 url
 USB
+UseForceSensorReading
 username
 usgs
 usp
@@ -4034,6 +4135,7 @@ ynow
 yoff
 Yorke
 YouTube
+Youle
 YPOS
 ypos
 yprev

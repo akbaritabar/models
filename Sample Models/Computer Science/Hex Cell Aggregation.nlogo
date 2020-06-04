@@ -360,7 +360,7 @@ Hex Cells Example
 
 ## CREDITS AND REFERENCES
 
-This model was inspired by Stephen Wolfram's A New Kind of Science. A very similar model is discussed here: https://www.wolframscience.com/nksonline/page-331. In the notes at the end of the book, many extensions are suggested, although none on a hexagonal grid.
+This model was inspired by Stephen Wolfram's A New Kind of Science. A very similar model is discussed here: https://www.wolframscience.com/nks/p331--the-phenomenon-of-continuity/. In the notes at the end of the book, many extensions are suggested, although none on a hexagonal grid.
 
 Thanks to Josh Unterman and Seth Tisue for their work on this model.
 
@@ -660,7 +660,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 setup repeat 3800 [ go ]
 @#$#@#$#@

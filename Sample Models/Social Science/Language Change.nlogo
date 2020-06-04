@@ -84,7 +84,7 @@ end
 
 ;; reports a string of the agent's initial grammar
 to-report orig-grammar-string
-  report ifelse-value (orig-state = 1.0) ["1"] ["0"]
+  report ifelse-value orig-state = 1.0 ["1"] ["0"]
 end
 
 ;;;
@@ -582,7 +582,7 @@ Preferential Attachment
 ## CREDITS AND REFERENCES
 
 This model was also described in Troutman, Celina; Clark, Brady; and Goldrick, Matthew (2008) "Social networks and intraspeaker variation during periods of language change," University of Pennsylvania Working Papers in Linguistics: Vol. 14: Issue 1, Article 25.
-http://repository.upenn.edu/pwpl/vol14/iss1/25/
+https://repository.upenn.edu/pwpl/vol14/iss1/25/
 
 ## HOW TO CITE
 
@@ -901,7 +901,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

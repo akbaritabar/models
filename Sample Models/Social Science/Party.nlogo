@@ -86,8 +86,8 @@ end
 
 to spread-out-vertically  ;; turtle procedure
   ifelse woman?
-    [ set heading 180 ]  ;; face north
-    [ set heading   0 ]  ;; face south
+    [ set heading 180 ]  ;; face south
+    [ set heading   0 ]  ;; face north
   fd 4                   ;; leave a gap
   while [any? other turtles-here] [
     if-else can-move? 2 [
@@ -701,7 +701,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 setup
 repeat 20 [ go ]

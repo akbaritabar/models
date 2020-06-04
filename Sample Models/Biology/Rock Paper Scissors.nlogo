@@ -1,175 +1,123 @@
-globals [
-  gini-index-reserve
-  lorenz-points
-]
-
-turtles-own [
-  sugar           ;; the amount of sugar this turtle has
-  metabolism      ;; the amount of sugar that each turtles loses each tick
-  vision          ;; the distance that this turtle can see in the horizontal and vertical directions
-  vision-points   ;; the points that this turtle can see in relative to it's current position (based on vision)
-  age             ;; the current age of this turtle (in ticks)
-  max-age         ;; the age at which this turtle will die of natural causes
-]
-
-patches-own [
-  psugar           ;; the amount of sugar on this patch
-  max-psugar       ;; the maximum amount of sugar that can be on this patch
-]
-
-;;
-;; Setup Procedures
-;;
-
 to setup
-  if maximum-sugar-endowment <= minimum-sugar-endowment [
-    user-message "Oops: the maximum-sugar-endowment must be larger than the minimum-sugar-endowment"
-    stop
-  ]
   clear-all
-  create-turtles initial-population [ turtle-setup ]
-  setup-patches
-  update-lorenz-and-gini
+  ask patches [
+    ; Start populations at roughly even levels.
+    set pcolor one-of [ red green blue black ]
+  ]
   reset-ticks
 end
 
-to turtle-setup ;; turtle procedure
-  set color red
-  set shape "circle"
-  move-to one-of patches with [not any? other turtles-here]
-  set sugar random-in-range minimum-sugar-endowment maximum-sugar-endowment
-  set metabolism random-in-range 1 4
-  set max-age random-in-range 60 100
-  set age 0
-  set vision random-in-range 1 6
-  ;; turtles can look horizontally and vertically up to vision patches
-  ;; but cannot look diagonally at all
-  set vision-points []
-  foreach (range 1 (vision + 1)) [ n ->
-    set vision-points sentence vision-points (list (list 0 n) (list n 0) (list 0 (- n)) (list (- n) 0))
-  ]
-  run visualization
-end
-
-to setup-patches
-  file-open "sugar-map.txt"
-  foreach sort patches [ p ->
-    ask p [
-      set max-psugar file-read
-      set psugar max-psugar
-      patch-recolor
-    ]
-  ]
-  file-close
-end
-
-;;
-;; Runtime Procedures
-;;
-
 to go
-  if not any? turtles [
-    stop
-  ]
-  ask patches [
-    patch-growback
-    patch-recolor
-  ]
-  ask turtles [
-    turtle-move
-    turtle-eat
-    set age (age + 1)
-    if sugar <= 0 or age > max-age [
-      hatch 1 [ turtle-setup ]
-      die
+  ; This model uses an event-based approach. It calculates how many events of each type
+  ; should occur each tick and then executes those events in a random order. Event type
+  ; could be signified by any constant. Here, we use a the numbers 0, 1, and 2 to signify
+  ; event type, but then store those numbers in variables with clear names for readability.
+  let swap-event 0
+  let reproduce-event 1
+  let select-event 2
+
+  ; Note that we have to compute the number of global events rather than the number of
+  ; actions that each individual patch performs since the execution of those events has
+  ; to be random between the patches. That is, a single patch can't perform all of their
+  ; actions in one go: suppose they end up executing 5 swaps in one tick. The swaps would
+  ; be shuffling things around locally rather than allowing for an organism to travel
+  ; multiple steps.
+  ; Hence, this code creates a list with an entry for each event type that should occur
+  ; this tick, then shuffles that list so that the events are in a random order. We then
+  ; iterate through the list, and random neighboring patches run the corresponding event.
+  let repetitions count patches / 3 ; At default settings, there will be an average of 1 event per patch.
+  let events shuffle (sentence
+    n-values random-poisson (repetitions * swap-rate)      [ swap-event ]
+    n-values random-poisson (repetitions * reproduce-rate) [ reproduce-event ]
+    n-values random-poisson (repetitions * select-rate)    [ select-event ]
+  )
+
+  foreach events [ event ->
+    ask one-of patches [
+      let target one-of neighbors4
+      if event = swap-event      [ swap target ]
+      if event = reproduce-event [ reproduce target ]
+      if event = select-event    [ select target ]
     ]
-    run visualization
   ]
-  update-lorenz-and-gini
   tick
 end
 
-to turtle-move ;; turtle procedure
-  ;; consider moving to unoccupied patches in our vision, as well as staying at the current patch
-  let move-candidates (patch-set patch-here (patches at-points vision-points) with [not any? turtles-here])
-  let possible-winners move-candidates with-max [psugar]
-  if any? possible-winners [
-    ;; if there are any such patches move to one of the patches that is closest
-    move-to min-one-of possible-winners [distance myself]
+; Patch procedures
+
+; Swap PCOLOR with TARGET.
+to swap [ target ]
+  let old-color pcolor
+  set pcolor [ pcolor ] of target
+  ask target [ set pcolor old-color ]
+end
+
+; Compete with TARGET. The loser becomes blank.
+to select [ target ]
+  ifelse beat? target [
+    ask target [ set pcolor black ]
+  ] [
+    if [ beat? myself ] of target [
+      set pcolor black
+    ]
   ]
 end
 
-to turtle-eat ;; turtle procedure
-  ;; metabolize some sugar, and eat all the sugar on the current patch
-  set sugar (sugar - metabolism + psugar)
-  set psugar 0
-end
-
-to patch-recolor ;; patch procedure
-  ;; color patches based on the amount of sugar they have
-  set pcolor (yellow + 4.9 - psugar)
-end
-
-to patch-growback ;; patch procedure
-  ;; gradually grow back all of the sugar for the patch
-  set psugar min (list max-psugar (psugar + 1))
-end
-
-to update-lorenz-and-gini
-  let num-people count turtles
-  let sorted-wealths sort [sugar] of turtles
-  let total-wealth sum sorted-wealths
-  let wealth-sum-so-far 0
-  let index 0
-  set gini-index-reserve 0
-  set lorenz-points []
-  repeat num-people [
-    set wealth-sum-so-far (wealth-sum-so-far + item index sorted-wealths)
-    set lorenz-points lput ((wealth-sum-so-far / total-wealth) * 100) lorenz-points
-    set index (index + 1)
-    set gini-index-reserve
-      gini-index-reserve +
-      (index / num-people) -
-      (wealth-sum-so-far / total-wealth)
+; If TARGET is blank, reproduce on that patch. If I'm blank, TARGET reproduces on my patch.
+to reproduce [ target ]
+  ifelse [ pcolor ] of target = black [
+    ask target [
+      set pcolor [ pcolor ] of myself
+    ]
+  ] [
+    if pcolor = black [
+      set pcolor [ pcolor ] of target
+    ]
   ]
 end
 
-;;
-;; Utilities
-;;
-
-to-report random-in-range [low high]
-  report low + random (high - low + 1)
+; Determine whether or not I beat TARGET
+to-report beat? [ target ]
+  report (pcolor = red   and [ pcolor ] of target = green) or
+         (pcolor = green and [ pcolor ] of target = blue) or
+         (pcolor = blue  and [ pcolor ] of target = red)
 end
 
-;;
-;; Visualization Procedures
-;;
+; Utility procedures
 
-to no-visualization ;; turtle procedure
-  set color red
+to-report rate-from-exponent [ exponent ]
+  report 10 ^ exponent
 end
 
-to color-agents-by-vision ;; turtle procedure
-  set color red - (vision - 3.5)
+to-report swap-rate
+  report rate-from-exponent swap-rate-exponent
 end
 
-to color-agents-by-metabolism ;; turtle procedure
-  set color red + (metabolism - 2.5)
+to-report reproduce-rate
+  report rate-from-exponent reproduce-rate-exponent
+end
+
+to-report select-rate
+  report rate-from-exponent select-rate-exponent
+end
+
+; Convert the given rate to a percentage of how much that action happens
+to-report percentage [ rate ]
+  report 100 * rate / (swap-rate + reproduce-rate + select-rate)
 end
 
 
-; Copyright 2009 Uri Wilensky.
+; Copyright 2017 Uri Wilensky.
 ; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-300
+310
 10
-708
-419
+771
+472
 -1
 -1
-8.0
+3.0
 1
 10
 1
@@ -179,10 +127,10 @@ GRAPHICS-WINDOW
 1
 1
 1
-0
-49
-0
-49
+-75
+75
+-75
+75
 1
 1
 1
@@ -190,10 +138,10 @@ ticks
 30.0
 
 BUTTON
+5
 10
-135
-90
-175
+100
+43
 NIL
 setup
 NIL
@@ -207,213 +155,177 @@ NIL
 1
 
 BUTTON
-100
-135
-190
-175
-NIL
-go
-T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-0
-
-BUTTON
-200
-135
-290
-175
-go once
-go
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-0
-
-CHOOSER
+115
 10
-190
-290
-235
-visualization
-visualization
-"no-visualization" "color-agents-by-vision" "color-agents-by-metabolism"
-0
-
-PLOT
-720
-10
-925
-140
-Wealth distribution
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" "set-histogram-num-bars 10\nset-plot-x-range 0 (max [sugar] of turtles)\nset-plot-pen-interval ((max [sugar] of turtles) / 10)"
-PENS
-"default" 1.0 1 -16777216 true "" "histogram ([sugar] of turtles)"
-
-SLIDER
-10
-10
-290
+210
 43
-initial-population
-initial-population
-10
-1000
-400.0
-10
+NIL
+go\n
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+0
+
+SLIDER
+5
+55
+210
+88
+swap-rate-exponent
+swap-rate-exponent
+-1
+1
+0.0
+0.1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-10
-50
-290
-83
-minimum-sugar-endowment
-minimum-sugar-endowment
-0
-200
-5.0
+5
+100
+210
+133
+reproduce-rate-exponent
+reproduce-rate-exponent
+-1
 1
+0.0
+0.1
 1
 NIL
 HORIZONTAL
 
-PLOT
-720
+SLIDER
+5
 145
-925
-295
-Lorenz curve
-Pop %
-Wealth %
-0.0
-100.0
-0.0
-100.0
-false
-true
-"" ""
-PENS
-"equal" 100.0 0 -16777216 true ";; draw a straight line from lower left to upper right\nset-current-plot-pen \"equal\"\nplot 0\nplot 100" ""
-"lorenz" 1.0 0 -2674135 true "" "plot-pen-reset\nset-plot-pen-interval 100 / count turtles\nplot 0\nforeach lorenz-points plot"
-
-PLOT
-720
-300
-925
-440
-Gini index vs. time
-Time
-Gini
-0.0
-100.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -13345367 true "" "plot (gini-index-reserve / count turtles) * 2"
-
-SLIDER
-10
-90
-290
-123
-maximum-sugar-endowment
-maximum-sugar-endowment
-0
-200
-25.0
+210
+178
+select-rate-exponent
+select-rate-exponent
+-1
 1
+0.0
+0.1
 1
 NIL
 HORIZONTAL
+
+PLOT
+5
+190
+305
+470
+Populations
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" "plot count patches with [ pcolor = red ]"
+"pen-1" 1.0 0 -10899396 true "" "plot count patches with [ pcolor = green ]"
+"pen-2" 1.0 0 -13345367 true "" "plot count patches with [ pcolor = blue ]"
+
+MONITOR
+215
+50
+305
+95
+swap-%
+percentage swap-rate
+2
+1
+11
+
+MONITOR
+215
+95
+305
+140
+reproduce-%
+percentage reproduce-rate
+2
+1
+11
+
+MONITOR
+215
+140
+305
+185
+select-%
+percentage select-rate
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
 
-This third model in the NetLogo Sugarscape suite implements Epstein & Axtell's Sugarscape Wealth Distribution model, as described in chapter 2 of their book Growing Artificial Societies: Social Science from the Bottom Up. It provides a ground-up simulation of inequality in wealth. Only a minority of the population have above average wealth, while most agents have wealth near the same level as the initial endowment.
+This model explores the role of movement and space in a three species ecosystem. The system consists of three species, represented by red patches, green patches, and blue patches, which compete over space. The interactions between the species are based on the game Rock-Paper-Scissors. That is, red beats green, green beats blue, and blue beats red. Organisms compete with their neighbors, move throughout the environment, and reproduce. These interactions result in spiral patterns whose size and stability depends on the movement rate of the organisms.
 
-The inequity of the resulting distribution can be described graphically by the Lorenz curve and quantitatively by the Gini coefficient.
+The model is written in an event-based fashion, to reflect the formulation of the published model. See HOW IT WORKS and EXTENDING THE MODEL.
 
 ## HOW IT WORKS
 
-Each patch contains some sugar, the maximum amount of which is predetermined. At each tick, each patch regains one unit of sugar, until it reaches the maximum amount.
-The amount of sugar a patch currently contains is indicated by its color; the darker the yellow, the more sugar.
+Each patch can be occupied by one of three species or can be blank. The species are represented by three colors: red, green, and blue. Each tick, the following types of events happen at defined average rates:
 
-At setup, agents are placed at random within the world. Each agent can only see a certain distance horizontally and vertically. At each tick, each agent will move to the nearest unoccupied location within their vision range with the most sugar, and collect all the sugar there.  If its current location has as much or more sugar than any unoccupied location it can see, it will stay put.
+- Select event: Two random neighbors compete with each other. In competition, red beats green, green beats blue, and blue beats red, like in rock paper scissors. The losing patch becomes blanks.
+- Reproduce event: Two random neighbors attempt to reproduce. If one of the neighbors is blank, it acquires the color of the other. Nothing happens if neither neighbor is blank.
+- Swap event: Two random neighbors swap color. This represents the organisms moving.
 
-Agents also use (and thus lose) a certain amount of sugar each tick, based on their metabolism rates. If an agent runs out of sugar, it dies.
+The exact number of, for instance, swap events that occur each tick is drawn from a [Poisson distribution](https://en.wikipedia.org/wiki/Poisson_distribution) with mean equal to `(count patches) * 10 ^ swap-rate-exponent`. A Poisson distribution defines how many times a particular event occurs given an average rate for that event assuming that the occurrences of that event are independent. Here, the occurrences of the events are approximately independent since they're being performed by different organisms.
 
-Each agent also has a maximum age, which is assigned randomly from the range 60 to 100 ticks.  When the agent reaches an age beyond its maximum age, it dies.
-
-Whenever an agent dies (either from starvation or old age), a new randomly initialized agent is created somewhere in the world; hence, in this model the global population count stays constant.
+The events occur in a random order involving random pairs of neighbors.
 
 ## HOW TO USE IT
 
-The INITIAL-POPULATION slider sets how many agents are in the world.
+Press SETUP to initialize the model and GO to run it.
 
-The MINIMUM-SUGAR-ENDOWMENT and MAXIMUM-SUGAR-ENDOWMENT sliders set the initial amount of sugar ("wealth") each agent has when it hatches. The actual value is randomly chosen from the given range.
+SWAP-RATE-EXPONENT, REPRODUCE-RATE-EXPONENT, and SELECT-RATE-EXPONENT each control the rate at which their respective actions are performed. There will be an average of `count patches * 10 ^ rate-exponent` events each tick for each event type. This means that increasing a slider by `1.0` will result in that event type occurring 10 times more often, no matter what the other sliders are set to. The SWAP-%, REPRODUCE-%, and SELECT-% monitors indicate what percentage of events will be swap, reproduce, and select events (respectively) each tick.
 
-Press SETUP to populate the world with agents and import the sugar map data. GO will run the simulation continuously, while GO ONCE will run one tick.
-
-The VISUALIZATION chooser gives different visualization options and may be changed while the GO button is pressed. When NO-VISUALIZATION is selected all the agents will be red. When COLOR-AGENTS-BY-VISION is selected the agents with the longest vision will be darkest and, similarly, when COLOR-AGENTS-BY-METABOLISM is selected the agents with the lowest metabolism will be darkest.
-
-The WEALTH-DISTRIBUTION histogram on the right shows the distribution of wealth.
-
-The LORENZ CURVE plot shows what percent of the wealth is held by what percent of the population, and the the GINI-INDEX V. TIME plot shows a measure of the inequity of the distribution over time.  A GINI-INDEX of 0 equates to everyone having the exact same amount of wealth (collected sugar), and a GINI-INDEX of 1 equates to the most skewed wealth distribution possible, where a single person has all the sugar, and no one else has any.
+The POPULATIONS plot shows how much of each organism there is over time.
 
 ## THINGS TO NOTICE
 
-After running the model for a while, the wealth distribution histogram shows that there are many more agents with low wealth than agents with high wealth.
+Running the model quickly results in a collection of interconnected spirals in which each species is chasing another species.
 
-Some agents will have less than the minimum initial wealth (MINIMUM-SUGAR-ENDOWMENT), if the minimum initial wealth was greater than 0.
+Global population levels of each of the species oscillate over time.
 
 ## THINGS TO TRY
 
-How does the initial population affect the wealth distribution? How long does it take for the skewed distribution to emerge?
+- What happens as you increase SWAP-RATE-EXPONENT? What happens to the shape and size of the spirals? Why does this happen?
+- What happens as you decrease SWAP-RATE-EXPONENT?
+- Can you find parameter settings that result in the extinction of one of the species? What happens to the other two species?
 
-How is the wealth distribution affected when you change the initial endowments of wealth?
+## EXTENDING THE MODEL
+
+- Try generalizing the model to more than three species.
+- The model is written in an event-based manner. Try rewriting it in a more idiomatic agent-based way.
 
 ## NETLOGO FEATURES
 
-All of the Sugarscape models create the world by using `file-read` to import data from an external file, `sugar-map.txt`. This file defines both the initial and the maximum sugar value for each patch in the world.
-
-Since agents cannot see diagonally we cannot use `in-radius` to find the patches in the agents' vision.  Instead, we use `at-points`.
+The model makes heavy use of the `random-poisson` primitive. This primitive is useful when modeling events that happen at various rates. Furthermore, this model uses a technique wherein a list of events is produced and shuffled to simulate the occurrence of each event at each rate while still allowing the events to occur in arbitrary orders.
 
 ## RELATED MODELS
 
-Other models in the NetLogo Sugarscape suite include:
-
-* Sugarscape 1 Immediate Growback
-* Sugarscape 2 Constant Growback
-
-For more explanation of the Lorenz curve and the Gini index, see the Info tab of the Wealth Distribution model.  (That model is also based on Epstein and Axtell's Sugarscape model, but more loosely.)
+Wolf Sheep Predation shows a simpler predator prey model.
 
 ## CREDITS AND REFERENCES
 
-Epstein, J. and Axtell, R. (1996). Growing Artificial Societies: Social Science from the Bottom Up.  Washington, D.C.: Brookings Institution Press.
+Reichenbach, T., Mobilia, M., & Frey, E. (2008). Self-organization of mobile populations in cyclic competition. Journal of Theoretical Biology, 254(2), 368–383. https://www.sciencedirect.com/science/article/pii/S0022519308002464?via%3Dihub
+
+Reichenbach, T., Mobilia, M., & Frey, E. (2007). Mobility promotes and jeopardizes biodiversity in rock-paper-scissors games. Nature, 448(7157), 1046–1049. https://doi.org/10.1038/nature06095
 
 ## HOW TO CITE
 
@@ -421,7 +333,7 @@ If you mention this model or the NetLogo software in a publication, we ask that 
 
 For the model itself:
 
-* Li, J. and Wilensky, U. (2009).  NetLogo Sugarscape 3 Wealth Distribution model.  http://ccl.northwestern.edu/netlogo/models/Sugarscape3WealthDistribution.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+* Head, B., Grider, R. and Wilensky, U. (2017).  NetLogo Rock Paper Scissors model.  http://ccl.northwestern.edu/netlogo/models/RockPaperScissors.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 
 Please cite the NetLogo software as:
 
@@ -429,7 +341,7 @@ Please cite the NetLogo software as:
 
 ## COPYRIGHT AND LICENSE
 
-Copyright 2009 Uri Wilensky.
+Copyright 2017 Uri Wilensky.
 
 ![CC BY-NC-SA 3.0](http://ccl.northwestern.edu/images/creativecommons/byncsa.png)
 
@@ -437,7 +349,7 @@ This work is licensed under the Creative Commons Attribution-NonCommercial-Share
 
 Commercial licenses are also available. To inquire about commercial licenses, please contact Uri Wilensky at uri@northwestern.edu.
 
-<!-- 2009 Cite: Li, J. -->
+<!-- 2017 Cite: Head, B., Grider, R. -->
 @#$#@#$#@
 default
 true
@@ -631,6 +543,22 @@ Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
 
+sheep
+false
+15
+Circle -1 true true 203 65 88
+Circle -1 true true 70 65 162
+Circle -1 true true 150 105 120
+Polygon -7500403 true false 218 120 240 165 255 165 278 120
+Circle -7500403 true false 214 72 67
+Rectangle -1 true true 164 223 179 298
+Polygon -1 true true 45 285 30 285 30 240 15 195 45 210
+Circle -1 true true 3 83 150
+Rectangle -1 true true 65 221 80 296
+Polygon -1 true true 195 285 210 285 210 240 240 210 195 210
+Polygon -7500403 true false 276 85 285 105 302 99 294 83
+Polygon -7500403 true false 219 85 210 105 193 99 201 83
+
 square
 false
 0
@@ -715,13 +643,20 @@ Line -7500403 true 40 84 269 221
 Line -7500403 true 40 216 269 79
 Line -7500403 true 84 40 221 269
 
+wolf
+false
+0
+Polygon -16777216 true false 253 133 245 131 245 133
+Polygon -7500403 true true 2 194 13 197 30 191 38 193 38 205 20 226 20 257 27 265 38 266 40 260 31 253 31 230 60 206 68 198 75 209 66 228 65 243 82 261 84 268 100 267 103 261 77 239 79 231 100 207 98 196 119 201 143 202 160 195 166 210 172 213 173 238 167 251 160 248 154 265 169 264 178 247 186 240 198 260 200 271 217 271 219 262 207 258 195 230 192 198 210 184 227 164 242 144 259 145 284 151 277 141 293 140 299 134 297 127 273 119 270 105
+Polygon -7500403 true true -1 195 14 180 36 166 40 153 53 140 82 131 134 133 159 126 188 115 227 108 236 102 238 98 268 86 269 92 281 87 269 103 269 113
+
 x
 false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

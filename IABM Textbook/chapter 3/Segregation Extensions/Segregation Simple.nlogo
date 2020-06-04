@@ -8,7 +8,7 @@ turtles-own [
   happy?          ;; for each turtle, indicates whether at least %-similar-wanted percent of
                   ;; that turtle's neighbors are the same color as the turtle
   similar-nearby  ;; how many neighboring patches have a turtle with my color?
-  total-nearby    ;; sum of previous two variables
+  total-nearby    ;; how many neighboring patches have a turtle?
 ]
 
 
@@ -282,7 +282,7 @@ This model is a simplified version of:
 The original work by Thomas Schelling was published in:
 Schelling, T. (1978). Micromotives and Macrobehavior. New York: Norton.
 
-See also: Rauch, J. (2002). Seeing Around Corners; The Atlantic Monthly; April 2002;Volume 289, No. 4; 35-48. http://www.theatlantic.com/magazine/archive/2002/04/seeing-around-corners/302471/
+See also: Rauch, J. (2002). Seeing Around Corners; The Atlantic Monthly; April 2002;Volume 289, No. 4; 35-48. https://www.theatlantic.com/magazine/archive/2002/04/seeing-around-corners/302471/
 
 ## HOW TO CITE
 
@@ -607,7 +607,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

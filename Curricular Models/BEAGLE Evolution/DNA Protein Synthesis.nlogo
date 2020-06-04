@@ -848,7 +848,7 @@ end
 
 
 to-report current-instruction-label
-  report ifelse-value (current-instruction = 0)
+  report ifelse-value current-instruction = 0
     [ "press setup" ]
     [ (word current-instruction " of " length instructions) ]
 end
@@ -1195,7 +1195,7 @@ count proteins with [strand = \"duplicate\"]
 TEXTBOX
 306
 263
-461
+462
 281
 Replicated DNA in new cell
 11
@@ -2292,7 +2292,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

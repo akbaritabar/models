@@ -151,7 +151,7 @@ to end-week ;; team procedure
   [
     ;; the demand starts at 4 cases per week. In week 7 it rises to
     ;; 8 cases and remains there the rest of the time.
-    set orders-placed ifelse-value ([clock] of myself <= 5) [ 4 ][ 8 ]
+    set orders-placed ifelse-value [clock] of myself <= 5 [ 4 ][ 8 ]
   ]
 
   ;; produce the goods at the factory level
@@ -741,11 +741,15 @@ If you mention this model or the NetLogo software in a publication, we ask that 
 
 For the model itself:
 
-* Wilensky, U. and Stroup, W. (2003).  NetLogo HubNet Root Beer Game HubNet model.  http://ccl.northwestern.edu/netlogo/models/HubNetRootBeerGameHubNet.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+* Wilensky, U. and Stroup, W. (2003).  NetLogo Root Beer Game HubNet model.  http://ccl.northwestern.edu/netlogo/models/HubNetRootBeerGameHubNet.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 
 Please cite the NetLogo software as:
 
 * Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+
+Please cite the HubNet software as:
+
+* Wilensky, U. & Stroup, W. (1999). HubNet. http://ccl.northwestern.edu/netlogo/hubnet.html. Center for Connected Learning and Computer-Based Modeling, Northwestern University. Evanston, IL.
 
 ## COPYRIGHT AND LICENSE
 
@@ -1049,7 +1053,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 need-to-manually-make-preview-for-this-model
 @#$#@#$#@

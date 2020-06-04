@@ -678,7 +678,7 @@ Wikipedia on Lightning:
 https://en.wikipedia.org/wiki/Lightning
 
 How Stuff Works on Lightning:
-http://science.howstuffworks.com/nature/natural-disasters/lightning.htm
+https://science.howstuffworks.com/nature/natural-disasters/lightning.htm
 
 National Geographic on Lightning:
 http://environment.nationalgeographic.com/environment/natural-disasters/lightning-profile.html
@@ -1038,7 +1038,7 @@ Line -7500403 true 40 84 269 221
 Line -7500403 true 40 216 269 79
 Line -7500403 true 84 40 221 269
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 setup
 repeat 50 [ go ]

@@ -1188,7 +1188,7 @@ The model also simulates detailed information about each agent in the simulation
 
 A CITYSCAPE is generated, spreading out from a city center.  Each patch is assigned a land-value, and a level of electrical, water and transportation service.  A road network is drawn, and maquiladoras are placed at the edge of the city.
 
-An initial set of migrants are created at the edge of the city on "irregular" patches, meaning those patches with a low land-value, near water and away from maquiladoras.  A second set of migrants is created in the neighboring patches.  This establishes the base population of the irregular settlements.  The migrants also have a state of original, such as Jaliso or Oaxaca.
+An initial set of migrants are created at the edge of the city on "irregular" patches, meaning those patches with a low land-value, near water and away from maquiladoras.  A second set of migrants is created in the neighboring patches.  This establishes the base population of the irregular settlements.  The migrants also have a state of original, such as Jalisco or Oaxaca.
 
 Then each migrant is assigned a living-expanses values, which is determined by the value of the land they occupy, food and other utility costs, as well as the electrical, water, and transportation.  Food and other utility costs are constant for all agents.  The electrical and water costs are determined by the patches values.  Transportation is determined by their distance to service centers (like shopping centers), the distance to the maquiladoras they work at, and the access to transportation services their patch has.
 
@@ -1630,7 +1630,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 ask patches [ set pcolor white ]
 reset-ticks

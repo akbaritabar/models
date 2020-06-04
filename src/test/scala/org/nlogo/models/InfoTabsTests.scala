@@ -1,10 +1,14 @@
 package org.nlogo.models
 
+import java.util.{ ArrayList => JArrayList }
+
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
 import scala.util.{ Failure, Try }
 
-import org.pegdown.ast.{ Node, SuperNode, VerbatimNode }
+import com.vladsch.flexmark.ast.{ FencedCodeBlock, Node, IndentedCodeBlock }
+import com.vladsch.flexmark.parser.{ Parser, ParserEmulationProfile }
+import com.vladsch.flexmark.util.options.MutableDataSet
 
 import org.nlogo.app.infotab.InfoFormatter
 import org.nlogo.core.{ CompilerException, TokenType }
@@ -80,6 +84,15 @@ class InfoTabsTests extends TestModels {
     "Example HubNet" // because the code block in it uses procedure names that don't exist
   )
   testModels("Code blocks should only include NetLogo code") { model =>
+    val parser = {
+      val options = new MutableDataSet()
+
+      options.setFrom(ParserEmulationProfile.PEGDOWN)
+      options.set(Parser.MATCH_CLOSING_FENCE_CHARACTERS, Boolean.box(false))
+
+      Parser.builder(options).build()
+    }
+
     if (!model.isCompilable || codeTestsExceptions.contains(model.name))
       Seq.empty
     else
@@ -90,15 +103,18 @@ class InfoTabsTests extends TestModels {
             ws.procedures.keySet ++ program.breeds.keys ++ program.linkBreeds.keys ++
             program.breeds.values.flatMap(_.owns) ++ program.linkBreeds.values.flatMap(_.owns)
 
-        def getErrors(node: Node): Seq[(String, String)] = node match {
-          case code: VerbatimNode if code.getType != "text" => check(code.getText)
-          case parent: SuperNode                            => parent.getChildren.asScala.flatMap(child => getErrors(child))
-          case _                                            => Seq.empty
-        }
+        def getErrors(node: Node): Seq[(String, String)] =
+          node match {
+            case f: FencedCodeBlock if f.getInfo.trim.isEmpty =>
+              check(f.getContentChars.toString)
+            case i: IndentedCodeBlock => check(i.getContentChars.toString)
+            case other => other.getChildren.asScala.flatMap(s => getErrors(s)).toSeq
+          }
 
         def check(code: String) = {
           def compileProc(header: String, body: String) =
-            Try(ws.compiler.compileMoreCode(s"$header $body end", None, ws.world.program, ws.procedures, ws.getExtensionManager, ws.getCompilationEnvironment))
+            Try(ws.compiler.compileMoreCode(s"$header $body end", None, ws.world.program,
+              ws.procedures, ws.getExtensionManager, ws.getLibraryManager, ws.getCompilationEnvironment))
 
           val blocks = code.split("""\n\s*\n""")
           val errors = blocks map { block =>
@@ -130,7 +146,9 @@ class InfoTabsTests extends TestModels {
           blocks zip errors
         }
 
-        getErrors(InfoFormatter.pegDown.parseMarkdown(model.info.toArray)) map { case (code, error) => s"$error\n$code" }
+        val doc = parser.parse(model.info)
+
+        getErrors(doc) map { case (code, error) => s"$error\n$code" }
       }
   }
 

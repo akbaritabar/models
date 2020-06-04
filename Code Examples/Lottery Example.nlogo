@@ -160,7 +160,7 @@ In this version of the code, the agentset for the lottery (`turtles`) and the re
 
 ## RELATED MODELS
 
-Preferential Attachment, in the Networks section of Sample Models, uses this code.
+The Rnd Example model, in the Extensions Examples section of the Code Examples, shows how to achieve similar results using the `rnd` extension bundled with NetLogo.
 
 <!-- 2004 -->
 @#$#@#$#@
@@ -446,7 +446,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

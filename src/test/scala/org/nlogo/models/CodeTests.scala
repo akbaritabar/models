@@ -2,6 +2,7 @@ package org.nlogo.models
 
 import org.nlogo.core.TokenType
 import org.nlogo.core.TokenType.Command
+import org.nlogo.core.Model
 
 class CodeTests extends TestModels {
 
@@ -86,6 +87,10 @@ class CodeTests extends TestModels {
     "ppd" -> Seq.empty,
     "ppu" -> Seq.empty,
     "print" -> Seq(
+      // Exclusion for MTG models to print an error-message in rare case
+      // the sugar map isn't available for some reason (CB 05-18-2018)
+      "MTG 1 Equal Opportunities HubNet", "MTG 2 Random Assignment HubNet",
+      "MTG 3 Feedback Loop HubNet",
       // IABM textbook models using `print` in example code:
       "Example HubNet", "Voting Sensitivity Analysis",
       "Voting Component Verification", "Spread of Disease"
@@ -104,12 +109,13 @@ class CodeTests extends TestModels {
       "Gridlock HubNet", "Gridlock Alternate HubNet", "Polling Advanced HubNet",
       "Public Good HubNet", "4 Blocks", "9-Blocks", "Expected Value",
       "Expected Value Advanced", "Random Combinations and Permutations",
-      "Partition Permutation Distribution", "GenJam - Duple"
+      "Partition Permutation Distribution", "GenJam - Duple",
+      "PNoM 5 Virtual Syringe Temperature Graph"
     ),
     "who" -> Seq(
       // Some of the following models may make justifiable use of `who`, but most
       // probably don't. They should be revisited at some point. NP 2015-10-16.
-      "Disease HubNet", "Restaurants HubNet", "Prisoners Dilemma HubNet",
+      "Bidding Market", "Disease HubNet", "Restaurants HubNet", "Prisoners Dilemma HubNet",
       "Disease Doctors HubNet", "Planarity", "Tetris", "PD N-Person Iterated",
       "Minority Game", "Osmotic Pressure", "Scattering", "N-Bodies", "Rope",
       "Speakers", "Raindrops", "GasLab Free Gas", "GasLab Moving Piston",
@@ -119,7 +125,7 @@ class CodeTests extends TestModels {
       "GasLab Maxwells Demon", "GasLab Adiabatic Piston", "Turing Machine 2D",
       "PageRank", "Dining Philosophers", "Team Assembly", "Ants",
       "Simple Birth Rates", "BeeSmart Hive Finding", "Sunflower Biomorphs",
-      "AIDS", "Tumor", "Flocking Vee Formations", "Ant Lines", "Kaleidoscope",
+      "HIV", "Tumor", "Flocking Vee Formations", "Ant Lines", "Kaleidoscope",
       "Geometron Top-Down", "Optical Illusions", "Sound Machines", "Random Walk 360",
       "Expected Value Advanced", "GasLab Free Gas", "Rope",
       "Three Loops Example", "Shapes Example", "Disease With Android Avoidance HubNet",
@@ -134,7 +140,10 @@ class CodeTests extends TestModels {
       "Connected Chemistry Atmosphere", "Connected Chemistry 2 Changing Pressure",
       "Connected Chemistry 8 Gas Particle Sandbox", "DNA Protein Synthesis",
       "Hotelling's Law", "Tie System Example", "Piaget-Vygotsky Game", "GenJam - Duple",
-      "Lattice Land - Triangles Dissection", "Lattice Land - Triangles Explore", "Lattice Land - Explore"
+      "Lattice Land - Triangles Dissection", "Lattice Land - Triangles Explore", "Lattice Land - Explore",
+      "PNoM 1 Diffusion Sandbox", "PNoM 2 Diffusion Sensor Sandbox", "PNoM 3 Virtual Syringe",
+      "PNoM 4 Virtual Syringe Force Graph", "PNoM 5 Virtual Syringe Temperature Graph",
+      "PNoM 6 Particle Sandbox Gravity", "PNoM 7 Particle Sandbox Intermolecular Forces"
     ),
     "write" -> Seq.empty
   )
@@ -151,6 +160,9 @@ class CodeTests extends TestModels {
   // Some of these exceptions are debatable and should
   // be revisited at some point -- NP 2015-08-30
   val nonLowercaseExceptions = Map[String, Set[String]](
+    "Ant Adaptation" -> Set(
+      "create-HUD-display-of-ants"
+   ),
     "CA 1D Elementary" -> Set(
       "OIO", "IOI", "OII", "III", "OOI", "IOO", "IIO", "OOO"
     ),
@@ -178,6 +190,39 @@ class CodeTests extends TestModels {
     "Connected Chemistry Reversible Reaction" -> Set(
       "#-H2", "#-N2", "#-NH3"
     ),
+    "CRISPR Bacterium LevelSpace" -> Set(
+      "RNAPs-own",
+      "hatch-guide-RNAs",
+      "guide-RNA",
+      "guide-RNAs-own",
+      "go-guide-RNAs",
+      "CRISPR-function",
+      "guide-RNAs",
+      "go-RNAPs",
+      "CRISPR",
+      "RNAPs",
+      "create-RNAPs",
+      "transcripts-per-RNAP",
+      "CRISPR-function-%",
+      "RNAP",
+      "CRISPR-array",
+      "guide-RNAs-here"
+    ),
+    "CRISPR Bacterium" -> Set(
+      "RNAPs-own",
+      "hatch-guide-RNAs",
+      "guide-RNA",
+      "guide-RNAs-own",
+      "go-guide-RNAs",
+      "guide-RNAs",
+      "go-RNAPs",
+      "CRISPR",
+      "RNAPs",
+      "create-RNAPs",
+      "transcripts-per-RNAP",
+      "RNAP",
+      "guide-RNAs-here"
+    ),
     "Matrix Example" -> Set(
       "A", "mCopy", "B", "mRef", "conR2", "comR2", "linR2"
     ),
@@ -187,6 +232,9 @@ class CodeTests extends TestModels {
     ),
     "Weak Acid" -> Set(
       "calculate-pH", "plot-pH", "concOH", "record-pH", "pOH", "Ka", "pH", "concH"
+    ),
+    "Small Worlds" -> Set(
+      "node-A", "node-B"   
     ),
     "Strong Acid" -> Set(
       "calculate-pH", "concOH", "record-pH", "pOH", "pH", "concH"
@@ -261,6 +309,27 @@ class CodeTests extends TestModels {
     TokenType.Ident, TokenType.Command, TokenType.Reporter, TokenType.Keyword
   )
 
+  testModels("Plot names should be case insensitive") { model =>
+    (for {
+      m <- Option(Model)
+      duplicates = new Tokens(model).plotNames.map(_.toLowerCase)
+        .groupBy(identity)
+        .collect { case (x, ys) if ys.size > 1 => x }
+      if (duplicates.nonEmpty)
+    } yield(duplicates.mkString("\n"))).toSet
+  }
+
+  testModels("Plot-pen names should be case insensitive") { model =>
+    (for {
+      plot <- new Tokens(model).plotPenNamesByPlot
+      title = plot._1
+      duplicates = plot._2.map(_.toLowerCase).filter(_.nonEmpty)
+        .groupBy(identity)
+        .collect { case (x, ys) if ys.size > 1 => x }
+      if (duplicates.nonEmpty)
+    } yield(title + " plot: " + duplicates.mkString(", "))).toSet
+  }
+
   testModels("All identifiers should be lowercase") { model =>
     val allowed = nonLowercaseExceptions.getOrElse(model.baseName, Set.empty)
     (for {
@@ -287,6 +356,8 @@ class CodeTests extends TestModels {
     "Connected Chemistry 5 Temperature and Pressure",
     "Connected Chemistry 6 Volume and Pressure",
     "Connected Chemistry 8 Gas Particle Sandbox",
+    "CRISPR Ecosystem",
+    "CRISPR Ecosystem LevelSpace",
     "Decay",
     "Diprotic Acid",
     "Doppler",

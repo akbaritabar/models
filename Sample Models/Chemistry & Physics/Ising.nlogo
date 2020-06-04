@@ -294,7 +294,6 @@ The Ising model was first proposed by Wilhelm Lenz in 1920.  It is named after h
 There are many web pages which explore the Ising model in greater detail than attempted here. Here are a few:
 
 - http://pages.physics.cornell.edu/~sethna/teaching/sss/ising/intro.htm
-- http://dtjohnson.net/projects/ising
 - http://demonstrations.wolfram.com/IsingModel/
 
 ## HOW TO CITE
@@ -605,7 +604,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

@@ -88,9 +88,11 @@ to delete-segment
   if mouse-down? [
     if mouse-has-gotten-air? [
       let candidate (one-of dots with [ distancexy mouse-xcor mouse-ycor < 0.3 ])
-      ask segments [
-        if end1 = dot [who] of candidate [die]
-        if end2 = dot [who] of candidate [die]
+      if candidate != nobody [
+        ask segments [
+          if end1 = dot [who] of candidate [die]
+          if end2 = dot [who] of candidate [die]
+        ]
       ]
     ]
   ]
@@ -261,7 +263,7 @@ end
 to-report edges-helper [ vertices-list end-list ]
   let vertex (first vertices-list)
   let tail (but-first vertices-list)
-  report ifelse-value (empty? tail) [ end-list ] [ edges-helper tail (lput ([link-with (first tail)] of vertex) end-list) ]
+  report ifelse-value empty? tail [ end-list ] [ edges-helper tail (lput ([link-with (first tail)] of vertex) end-list) ]
 end
 
 ;  Polygonality code: Checks all edges and its intersections with other edges. In order to be a polygon, each edge must intersect with exactly two other edges.
@@ -337,7 +339,7 @@ to-report shared-link-ends [a b]
   let a-ends [ (list end1 end2) ] of a
   let b-ends [ (list end1 end2) ] of b
   let shared-ends filter [ a-end -> member? a-end b-ends ] a-ends
-  report ifelse-value (empty? shared-ends) [
+  report ifelse-value empty? shared-ends [
     (list)
   ] [
     (list (first shared-ends) (first shared-ends))
@@ -982,7 +984,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 need-to-manually-make-preview-for-this-model
 @#$#@#$#@

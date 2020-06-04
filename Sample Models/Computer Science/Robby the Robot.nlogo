@@ -294,7 +294,7 @@ end
 
 to mutate   ;; individual procedure
   set chromosome map [ action ->
-    ifelse-value (random-float 1 < mutation-rate)
+    ifelse-value random-float 1 < mutation-rate
       [random-action]
       [action]
   ] chromosome
@@ -323,11 +323,11 @@ to-report state
   let east patch-at 1 0
   let south patch-at 0 -1
   let west patch-at -1 0
-  report ifelse-value (is-patch? north) [ifelse-value (any? cans-on north) [81] [0]] [162] +
-         ifelse-value (is-patch? east ) [ifelse-value (any? cans-on east ) [27] [0]] [ 54] +
-         ifelse-value (is-patch? south) [ifelse-value (any? cans-on south) [ 9] [0]] [ 18] +
-         ifelse-value (is-patch? west ) [ifelse-value (any? cans-on west ) [ 3] [0]] [  6] +
-                                         ifelse-value (any? cans-here)     [ 1] [0]
+  report (ifelse-value is-patch? north [ifelse-value any? cans-on north [81] [0]] [162]) +
+         (ifelse-value is-patch? east  [ifelse-value any? cans-on east  [27] [0]] [ 54]) +
+         (ifelse-value is-patch? south [ifelse-value any? cans-on south [ 9] [0]] [ 18]) +
+         (ifelse-value is-patch? west  [ifelse-value any? cans-on west  [ 3] [0]] [  6]) +
+         (ifelse-value any? cans-here [1] [0])
 end
 
 ;; Below are the definitions of Robby's seven basic actions
@@ -406,7 +406,7 @@ end
 
 ;; count the number of occurrences of an item in a list
 to-report occurrences [x a-list]
-  report reduce [ [n the-item] -> ifelse-value (the-item = x) [ n + 1 ] [ n ] ] (fput 0 a-list)
+  report reduce [ [n the-item] -> ifelse-value the-item = x [ n + 1 ] [ n ] ] (fput 0 a-list)
 end
 
 ;; measure distance between two chromosomes
@@ -418,7 +418,7 @@ to-report chromosome-distance [individual1 individual2]
   ;; scale the distance to fit in the view
   let dist-candidate max-pxcor * sqrt dist2 / ( max-dist / 10)
   ;; if distance is too large, report the edge of the view
-  report ifelse-value (dist-candidate > max-pxcor) [max-pxcor] [dist-candidate]
+  report ifelse-value dist-candidate > max-pxcor [max-pxcor] [dist-candidate]
 end
 
 
@@ -1176,7 +1176,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 setup repeat 5 [ go ]
 @#$#@#$#@

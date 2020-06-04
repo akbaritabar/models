@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils.removeExtension
 import org.nlogo.api.LabProtocol
 import org.nlogo.api.PreviewCommands
 import org.nlogo.core.Button
+import org.nlogo.core.LibraryStatus
 import org.nlogo.core.Model
 import org.nlogo.core.Monitor
 import org.nlogo.core.Slider
@@ -24,15 +25,22 @@ package object models {
 
   org.nlogo.headless.Main.setHeadlessProperty()
 
-  lazy val onTravis: Boolean = sys.env.get("TRAVIS").filter(_.toBoolean).isDefined
+  lazy val onTestServer: Boolean = sys.env.get("JENKINS_URL").forall(!_.isEmpty)
 
   def withWorkspace[A](model: Model)(f: HeadlessWorkspace => A) = {
     val workspace = HeadlessWorkspace.newInstance
+    val libraryManager = workspace.getLibraryManager
+    libraryManager.reloadMetadata(isFirstLoad = false)
+    val updateableLibs = libraryManager.getExtensionInfos.filter(_.status == LibraryStatus.CanUpdate)
+    updateableLibs.foreach( (libInfo) => {
+      println(s"Updating extension: ${libInfo.name}")
+      libraryManager.installExtension(libInfo)
+    })
     try {
       workspace.silent = true
       // open the model from path instead of content string so that
       // the current directory gets set (necessary for `__includes`)
-      workspace.open(model.file.getCanonicalPath)
+      workspace.open(model.file.getCanonicalPath, true)
       f(workspace)
     } finally workspace.dispose()
   }
@@ -85,12 +93,12 @@ package object models {
     def previewFile = new File(removeExtension(file.getPath) + ".png")
     def infoTabParts = InfoTabParts.fromContent(model.info)
     def isCompilable: Boolean = {
-      val notCompilableOnTravis = Set(
+      val notCompilableOnTestServer = Set(
         "Beatbox", "Composer", "GasLab With Sound", "Musical Phrase Example",
         "Percussion Workbench", "Sound Workbench", "Sound Machines", "Frogger",
-        "Sound Machines", "GenJam - Duple") // because MIDI is not available on Travis
-      val neverCompilable = Set("GoGoMonitor", "GoGoMonitorSimple")
-      !(neverCompilable.contains(name) || (onTravis && notCompilableOnTravis.contains(name)))
+        "Sound Machines", "GenJam - Duple") // because MIDI is not available on Jenkins
+      val neverCompilable = Set("GoGoMonitor", "GoGoMonitorSimple", "Profiler Example")
+      !(neverCompilable.contains(name) || (onTestServer && notCompilableOnTestServer.contains(name)))
     }
     def protocols: Seq[LabProtocol] = model
       .optionalSectionValue("org.nlogo.modelsection.behaviorspace")

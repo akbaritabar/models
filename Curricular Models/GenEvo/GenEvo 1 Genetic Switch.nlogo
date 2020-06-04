@@ -44,7 +44,7 @@ RNAPs-own [
 ]
 
 lactoses-own [
-  partner     ; a partner is a LacI molecule with which an ONPG forms a complex
+  partner     ; a partner is a LacI molecule with which a lactose molecule forms a complex
   inside?     ; a boolean to track if a lactose molecule is inside the cell
 ]
 
@@ -239,7 +239,7 @@ end
 ; procedure for movement and molecular interactions of RNAPs
 to go-RNAPs
   ; In the presence of glucose, the probability of trancription is less.
-  let transcription-probability ifelse-value (glucose?) [ 0.1 ] [ 1 ]
+  let transcription-probability ifelse-value glucose? [ 0.1 ] [ 1 ]
 
   ; If any RNAPs are close to the promoter and the operator is not inhibited
   if (not inhibited?) [
@@ -544,6 +544,16 @@ to show-switch-color
   ask promoter [ set pcolor green ]
   ask operator [ set pcolor orange ]
   ask terminator [ set pcolor gray ]
+end
+
+
+; to convert the string for export-interface 'date-and-time' command to work on windows machines
+to-report replace-all [target replacement str]
+  let acc str
+  while [position target acc != false] [
+    set acc (replace-item (position target acc) acc replacement)
+  ]
+  report acc
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -853,7 +863,7 @@ BUTTON
 175
 78
 save screenshot
-export-interface (word \"GenEvo 1 Genetic Switch \" date-and-time \".png\")
+export-interface (word \"GenEvo 1 Genetic Switch \" (replace-all \":\" \"-\" date-and-time) \".png\")
 NIL
 1
 T
@@ -1371,7 +1381,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.1.1
 @#$#@#$#@
 need-to-manually-make-preview-for-this-model
 @#$#@#$#@
